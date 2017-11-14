@@ -3,10 +3,13 @@ const request = require('supertest');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
+const {ObjectID} = require('mongodb');
 
 const todos = [{
+	_id: new ObjectID(),
 	text: 'first todo test'
 }, {
+	_id: new ObjectID(),
 	text: 'second todo test'
 }];
 beforeEach((done) => {
@@ -70,6 +73,32 @@ describe('GET /todos', () => {
 			expect(res.body.todos.length).toBe(2);
 		})
 		
+		.end(done);
+	});
+});
+
+describe('GET /todos/:id', () => {
+	it('should return specific todo!', (done) => {
+		request(app)
+		.get('/todos/'+todos[0]._id)
+		.expect(200)
+		.expect((res) => {
+			expect(res.body.todo.text).toBe('first todo test');
+		})
+		.end(done);
+	});
+
+	it('should return 404 if not found', (done) => {
+		request(app)
+		.get('/todos/'+new ObjectID())
+		.expect(404)
+		.end(done);
+	});
+
+	it('should return 404 if not valid id', (done) => {
+		request(app)
+		.get('/todos/123')
+		.expect(404)
 		.end(done);
 	});
 });
