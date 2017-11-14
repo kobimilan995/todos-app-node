@@ -10,7 +10,9 @@ const todos = [{
 	text: 'first todo test'
 }, {
 	_id: new ObjectID(),
-	text: 'second todo test'
+	text: 'second todo test',
+	completed: true,
+	completedAt: 333
 }];
 beforeEach((done) => {
 	Todo.remove({}).then(()=> {
@@ -136,6 +138,39 @@ describe('DELETE /todos/:id', () => {
 		request(app)
 		.delete('/todos/123')
 		.expect(400)
+		.end(done);
+	});
+});
+
+describe('PATHC /todos/:id', () => {
+	it('should update a Todo', (done) => {
+		var id = todos[0]._id;
+		request(app)
+		.patch('/todos/'+id)
+		.send({
+			text: 'Duvaj ga',
+			completed: true
+		})
+		.expect(200)
+		.expect(res => {
+			expect(res.body.todo.text).toBe('Duvaj ga');
+			expect(res.body.todo.completed).toBe(true);
+		})
+		.end(done);
+	});
+
+
+	it('should clear completed at when todo is not completed', (done) => {
+		var id = todos[0]._id;
+		request(app)
+		.patch('/todos/'+id)
+		.send({
+			completed: false
+		})
+		.expect(200)
+		.expect(res => {
+			expect(res.body.todo.completed).toBe(false);
+		})
 		.end(done);
 	});
 });
